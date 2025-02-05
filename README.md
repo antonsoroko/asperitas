@@ -41,6 +41,21 @@ Asperitas is a full stack reddit clone that I wrote to learn more about Node.js,
     ```
 4. Browse to `http://localhost:3000/`
 
+### Run in Docker
+
+You can use [docker-compose](https://docs.docker.com/compose/) to start app without installing Node.js and MongoDB:
+```bash
+$ docker-compose up
+```
+To stop but preserve data:
+```bash
+$ docker-compose down
+```
+To stop and delete data (database and node_modules):
+```bash
+$ docker-compose down --volumes
+```
+
 ## Testing
 
 ### Server

@@ -1,0 +1,58 @@
+name: asperitas
+
+services:
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: server
+    restart: unless-stopped
+    environment:
+      - DATABASE_URL=mongodb://mongodb/reddit
+    ports:
+      - "8080:8080"
+    # volumes allow to see code changes without rebuilding Docker image
+    # at the expense of double node_modules directory size (one inside image and one inside volume)
+    # comment the whole section if you do not need such feature, and to save some disk space.
+    # read about this here https://docs.docker.com/engine/storage/volumes/#mounting-a-volume-over-existing-data
+    volumes:
+      - ./server:/home/node/app
+      - node_modules_server:/home/node/app/node_modules
+    networks:
+      - app-network
+    depends_on:
+      - mongodb
+    command: sh -c './wait-for mongodb:27017 -- npm start'
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: client
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./client:/home/node/app
+      - node_modules_client:/home/node/app/node_modules
+    networks:
+      - app-network
+    depends_on:
+      - server
+  mongodb:
+    image: mongo:4.2.24-bionic
+    container_name: mongodb
+    restart: unless-stopped
+    volumes:
+      # to make database data persistent
+      - dbdata:/data/db
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  dbdata:
+  node_modules_server:
+  node_modules_client:
